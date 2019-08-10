@@ -180,6 +180,10 @@ app.get('/data_add', function(req,res){
 app.get('/', function(req,res){
     res.send("<h1>Welcome!</h1>");
 });
+/* -- Public [GET] Routes -- */
+app.get('/service-test', function(req,res){
+  res.send("<h1>Service test!</h1>");
+});
 app.get('/getCategories', function(req,res){
     Category.find({}, function(err, Category) {
       if (err)
