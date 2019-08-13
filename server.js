@@ -199,6 +199,43 @@ app.get('/insert-first-mock-user', function(req,res){
     });
   });
 });
+app.get('/get-mock-user-token', function(req,res){
+  // find the user
+  User.findOne({
+    email: req.query.email
+  }, function(err, user) {
+
+    if (err) throw err;
+
+    if (!user) {
+        res.json({ success: false, message: 'Authentication failed. User not found.' });
+    } else if (user) {
+        bcrypt.compare(req.query.password, user.password, function(err, respuesta) {
+    // res == true
+
+    if (err) {console.log(err);}
+
+            if(respuesta==true){
+
+                const payload = {
+                admin: user.admin 
+            };
+                var token = jwt.sign(payload, app.get('alexAplicationKey'), {
+                  //expiresInMinutes: 1440 // expires in 24 hours
+                });
+
+                // return the information including token as JSON
+                res.json({
+                  success: true,
+                  message: 'Enjoy your token!',
+                  token: token
+                });
+
+          }else{res.json({ success: false, message: 'Authentication failed. Wrong password.' });}
+      });
+    }
+  });
+});
 app.get('/getCategories', function(req,res){
     Category.find({}, function(err, Category) {
       if (err)
