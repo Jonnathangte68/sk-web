@@ -184,6 +184,21 @@ app.get('/', function(req,res){
 app.get('/service-test', function(req,res){
   res.send("<h1>Service test!</h1>");
 });
+app.get('/insert-first-mock-user', function(req,res){
+  crypt.genSalt(saltRounds, function(err, salt) {
+    bcrypt.hash('admin', salt, function(err, hash) { 
+      var new_user = new User({ 
+        email: 'admin@administrator.com', 
+        password: hash,
+        admin: false 
+      });
+      new_user.save(function(e) {
+        if (e) {res.json({ success: false });}
+        return res.json({'status':1, 'message':"Mock user added!"});
+      });
+    });
+  });
+});
 app.get('/getCategories', function(req,res){
     Category.find({}, function(err, Category) {
       if (err)
