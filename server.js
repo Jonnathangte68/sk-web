@@ -185,7 +185,7 @@ app.get('/service-test', function(req,res){
   res.send("<h1>Service test!</h1>");
 });
 app.get('/insert-first-mock-user', function(req,res){
-  crypt.genSalt(saltRounds, function(err, salt) {
+  bcrypt.genSalt(saltRounds, function(err, salt) {
     bcrypt.hash('admin', salt, function(err, hash) { 
       var new_user = new User({ 
         email: 'admin@administrator.com', 
