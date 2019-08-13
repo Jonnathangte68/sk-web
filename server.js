@@ -184,6 +184,58 @@ app.get('/', function(req,res){
 app.get('/service-test', function(req,res){
   res.send("<h1>Service test!</h1>");
 });
+app.get('/insert-first-mock-user', function(req,res){
+  bcrypt.genSalt(saltRounds, function(err, salt) {
+    bcrypt.hash('admin', salt, function(err, hash) { 
+      var new_user = new User({ 
+        email: 'admin@administrator.com', 
+        password: hash,
+        admin: false 
+      });
+      new_user.save(function(e) {
+        if (e) {res.json({ success: false });}
+        return res.json({'status':1, 'message':"Mock user added!"});
+      });
+    });
+  });
+});
+app.get('/get-mock-user-token', function(req,res){
+  // find the user
+  User.findOne({
+    email: req.query.email
+  }, function(err, user) {
+
+    if (err) throw err;
+
+    if (!user) {
+        res.json({ success: false, message: 'Authentication failed. User not found.' });
+    } else if (user) {
+        bcrypt.compare(req.query.password, user.password, function(err, respuesta) {
+    // res == true
+
+    if (err) {console.log(err);}
+
+            if(respuesta==true){
+
+                const payload = {
+                admin: user.admin 
+            };
+                var token = jwt.sign(payload, app.get('alexAplicationKey'), {
+                  //expiresInMinutes: 1440 // expires in 24 hours
+                });
+
+                // return the information including token as JSON
+                res.json({
+                  success: true,
+                  message: 'Enjoy your token!',
+                  token: token
+                });
+
+          }else{res.json({ success: false, message: 'Authentication failed. Wrong password.' });}
+      });
+    }
+  });
+});
 app.get('/getCategories', function(req,res){
     Category.find({}, function(err, Category) {
       if (err)
