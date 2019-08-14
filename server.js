@@ -109,10 +109,6 @@ res.setHeader('Access-Control-Allow-Origin', '*');
     next();
 });
 
-
-console.log("TEST getting assets dir from the environment file");
-console.log(process.env.ASSETS_DIR);
-
 /* utils */ 
 
 async function interestGet(id) {
