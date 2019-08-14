@@ -1,4 +1,3 @@
-require('dotenv').config({ path: "/home/administrator/xtake_service" });
 var express = require('express'),
   app = express(),
   bcrypt = require('bcryptjs'),
@@ -93,6 +92,7 @@ const upload = multer({
   }*/
 }).single('filetoupload');
 const admin_base = "http://localhost:8000";
+require('dotenv').config({path: __dirname + '/.env'});
 // mongoose instance connection url connection
 mongoose.Promise = global.Promise;
 mongoose.connect(config.database, {useNewUrlParser: true } ); 
