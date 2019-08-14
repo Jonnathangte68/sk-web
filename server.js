@@ -1,4 +1,4 @@
-require('dotenv').config({path: __dirname + '/.env'});
+require('dotenv').config({ path: "/home/administrator/xtake_service" });
 var express = require('express'),
   app = express(),
   bcrypt = require('bcryptjs'),
