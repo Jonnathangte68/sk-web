@@ -92,6 +92,7 @@ const upload = multer({
   }*/
 }).single('filetoupload');
 const admin_base = "http://localhost:8000";
+require('dotenv').config({path: __dirname + '/.env'});
 // mongoose instance connection url connection
 mongoose.Promise = global.Promise;
 mongoose.connect(config.database, {useNewUrlParser: true } ); 
@@ -183,6 +184,58 @@ app.get('/', function(req,res){
 /* -- Public [GET] Routes -- */
 app.get('/service-test', function(req,res){
   res.send("<h1>Service test!</h1>");
+});
+app.get('/insert-first-mock-user', function(req,res){
+  bcrypt.genSalt(saltRounds, function(err, salt) {
+    bcrypt.hash('admin', salt, function(err, hash) { 
+      var new_user = new User({ 
+        email: 'admin@administrator.com', 
+        password: hash,
+        admin: false 
+      });
+      new_user.save(function(e) {
+        if (e) {res.json({ success: false });}
+        return res.json({'status':1, 'message':"Mock user added!"});
+      });
+    });
+  });
+});
+app.get('/get-mock-user-token', function(req,res){
+  // find the user
+  User.findOne({
+    email: req.query.email
+  }, function(err, user) {
+
+    if (err) throw err;
+
+    if (!user) {
+        res.json({ success: false, message: 'Authentication failed. User not found.' });
+    } else if (user) {
+        bcrypt.compare(req.query.password, user.password, function(err, respuesta) {
+    // res == true
+
+    if (err) {console.log(err);}
+
+            if(respuesta==true){
+
+                const payload = {
+                admin: user.admin 
+            };
+                var token = jwt.sign(payload, app.get('alexAplicationKey'), {
+                  //expiresInMinutes: 1440 // expires in 24 hours
+                });
+
+                // return the information including token as JSON
+                res.json({
+                  success: true,
+                  message: 'Enjoy your token!',
+                  token: token
+                });
+
+          }else{res.json({ success: false, message: 'Authentication failed. Wrong password.' });}
+      });
+    }
+  });
 });
 app.get('/getCategories', function(req,res){
     Category.find({}, function(err, Category) {
@@ -789,7 +842,7 @@ app.post('/image-storag', function(req,res) {
                                     console.log("...");
                                     console.log(doc);
                                     //doc.logo_url = 'file://'+storage_path;
-                                    doc.logo_url = 'http://127.0.0.1:3002/images/'+files.imagestorage.name; 
+                                    doc.logo_url = process.env.ASSETS_DIR+'images/'+files.imagestorage.name; 
                                     doc.save(function(){
                                       res.json({ success: true, message: 'done' });
                                     });
@@ -799,7 +852,7 @@ app.post('/image-storag', function(req,res) {
                                     if (err) 
                                       res.json({ success: false, message: 'e' });
                                     //doc.img_principal = 'file://'+storage_path;
-                                    doc.img_principal = 'http://127.0.0.1:3002/images/'+files.imagestorage.name; 
+                                    doc.img_principal = process.env.ASSETS_DIR+'images/'+files.imagestorage.name; 
                                     doc.save(function(){
                                       res.json({ success: true, message: 'done' });
                                     });
@@ -809,7 +862,7 @@ app.post('/image-storag', function(req,res) {
                                     if (err) 
                                       res.json({ success: false, message: 'e' });
                                     //doc.favicon = 'file://'+storage_path;
-                                    doc.favicon = 'http://127.0.0.1:3002/images/'+files.imagestorage.name; 
+                                    doc.favicon = process.env.ASSETS_DIR+'images/'+files.imagestorage.name; 
                                     doc.save(function(){
                                       res.json({ success: true, message: 'done' });
                                     });
@@ -822,7 +875,7 @@ app.post('/image-storag', function(req,res) {
                                     if (err) 
                                       res.json({ success: false, message: 'e' });
                                     //doc.logo_url = 'file://'+storage_path;
-                                    doc.imagen = 'http://127.0.0.1:3002/images/'+files.imagestorage.name; 
+                                    doc.imagen = process.env.ASSETS_DIR+'images/'+files.imagestorage.name; 
                                     doc.save(function(){
                                       res.json({ success: true, message: 'done' });
                                     });
@@ -835,13 +888,13 @@ app.post('/image-storag', function(req,res) {
                                 console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!111IMG BEING STORED!!!!!!!!!!!!!!!!!!!!!!!!!11');
                                 console.log(files);
                                 console.log(files.imagestorage.name);
-                                  res.json({ success: true, message: 'http://127.0.0.1:3002/images/'+files.imagestorage.name });
+                                  res.json({ success: true, message: process.env.ASSETS_DIR+'images/'+files.imagestorage.name });
                               }
                             break;
                           case 'recruiter':
                               // Distinto a Arriba retornador de url
                               if (campo=='profile_image') {
-                                  res.json({ success: true, message: 'http://127.0.0.1:3002/images/'+files.imagestorage.name });
+                                  res.json({ success: true, message: process.env.ASSETS_DIR+'images/'+files.imagestorage.name });
                               }
                             break;
                           case 'add':
@@ -851,7 +904,7 @@ app.post('/image-storag', function(req,res) {
                                     if (err) 
                                       res.json({ success: false, message: 'e' });
                                       //doc.logo_url = 'file://'+storage_path;
-                                      doc.banner_url = 'http://127.0.0.1:3002/images/'+files.imagestorage.name; 
+                                      doc.banner_url = process.env.ASSETS_DIR+'images/'+files.imagestorage.name; 
                                       doc.save(function(){
                                         res.json({ success: true, message: 'done' });
                                       });
@@ -3293,13 +3346,13 @@ app.post('/image_storage_for_app', function(req,res) {
                               case 'talent':
                                   // Distinto a Arriba retornador de url
                                   if (campo=='profile_img') {
-                                      res.json({ success: true, message: 'http://127.0.0.1:3002/images/'+files.file.name });
+                                      res.json({ success: true, message: process.env.ASSETS_DIR+'images/'+files.file.name });
                                   }
                                 break;
                               case 'recruiter':
                                   // Distinto a Arriba retornador de url
                                   if (campo=='profile_image') {
-                                      res.json({ success: true, message: 'http://127.0.0.1:3002/images/'+files.file.name });
+                                      res.json({ success: true, message: process.env.ASSETS_DIR+'images/'+files.file.name });
                                   }
                                 break;
                               default:
